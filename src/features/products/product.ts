@@ -1,54 +1,20 @@
-import { Elysia, t } from "elysia";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
+import { t,Static } from "elysia"
 
-// 1. ดึง URL จากไฟล์ .env
-const connectionString = process.env.DATABASE_URL;
+// 1. กำหนด Schema สำหรับการรับค่า
 
-// 2. สร้าง Connection Pool และ Adapter 
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
+//Schema สำหรับค่า ID จาก URL
+export const ProductIdParamSchema = t.Object({
+    id: t.Numeric({desciption: 'รหัสสินค้า (ID)'})
+});
 
-// 3. ใส่ Adapter เข้าไปตอนสร้าง PrismaClient
-const prisma = new PrismaClient({ adapter });
+export const CreateProductSchema = t.Object({
+    product_name: t.String({description:'ชื่อสินค้า'}),
+    price_day: t.Numeric({description:'ราคาต่อวัน'}),
+    deposit_amount:t.Numeric({description:'ค่ามัดจำที่ต้องจ่าย'}),
+    category_id:t.Numeric({description:'ID ของหมวดหมู่'})
+});
 
-export const productRoutes = new Elysia({ prefix: '/api/products' })
-  // API ดึงข้อมูลสินค้าทั้งหมด
-  .get("/", async () => {
-    const products = await prisma.product.findMany({
-      select: {
-        product_id     : true,
-        product_name   : true,
-        price_day      : true,
-        deposit_amount : true,
-        category_id    : true, 
-        categories:{
-            select:{
-                category_name : true,
-            }
-        }// ดึงชื่อหมวดหมู่มาด้วย
-      }
-    });
-    return products;
-  }, {
-    detail: {
-      tags: ['Products'],
-      summary: 'ดึงข้อมูลสินค้าทั้งหมด พร้อมหมวดหมู่'
-    }
-  })
-  
-  // API ดึงข้อมูลสินค้าตาม ID
-  .get("/:id", async ({ params: { id } }) => {
-    return await prisma.product.findUnique({
-      where: { product_id: Number(id) }
-    });
-  }, {
-    params: t.Object({
-      id: t.String({ description: 'รหัสสินค้า (ID)' })
-    }),
-    detail: {
-      tags: ['Products'],
-      summary: 'ค้นหาสินค้าจาก ID'
-    }
-  });
+
+
+export type IProductIDParam = Static<typeof ProductIdParamSchema>;
+export type ICreatProduct = Static<typeof CreateProductSchema>;
