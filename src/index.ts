@@ -3,7 +3,7 @@ import { swagger } from "@elysiajs/swagger";
 import {cors} from "@elysiajs/cors";
 import { globalErrorHandler } from "./setup/error";
 import { productRoutes } from "./features/products/product";
-import { memberRoutes } from "./features/ีusers/member";
+import { memberRoutes } from "./features/users/member";
 
 const app = new Elysia()
   //ดัก Error เพื่อครอบคลุม Route ทั้งหมด
